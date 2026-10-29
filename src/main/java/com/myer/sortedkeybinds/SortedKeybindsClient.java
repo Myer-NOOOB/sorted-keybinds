@@ -7,7 +7,6 @@ import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenKeyboardEvents;
 import net.minecraft.client.KeyMapping;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
@@ -52,6 +51,9 @@ public class SortedKeybindsClient implements ClientModInitializer {
 
     private static final List<Binding> BINDINGS = new ArrayList<>();
 
+    /** The screen currently open (null while playing), tracked via Fabric screen events. */
+    private static Screen currentScreen;
+
     private static void bind(String name, BooleanSupplier action) {
         KeyMapping key = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 "key." + MOD_ID + "." + name,
@@ -74,7 +76,7 @@ public class SortedKeybindsClient implements ClientModInitializer {
 
         // Keys pressed while playing (no screen open).
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            if (client.screen != null) return;
+            if (currentScreen != null) return;
             for (Binding b : BINDINGS) {
                 while (b.key.consumeClick()) b.fire();
             }
@@ -82,6 +84,10 @@ public class SortedKeybindsClient implements ClientModInitializer {
 
         // Keys pressed while a chest / inventory screen is open.
         ScreenEvents.AFTER_INIT.register((client, screen, width, height) -> {
+            currentScreen = screen;
+            ScreenEvents.remove(screen).register(removed -> {
+                if (currentScreen == removed) currentScreen = null;
+            });
             if (!(screen instanceof AbstractContainerScreen<?>)) return;
             ScreenKeyboardEvents.allowKeyPress(screen).register((s, keyEvent) -> {
                 if (s.getFocused() instanceof EditBox) return true; // typing in a search box
@@ -111,7 +117,7 @@ public class SortedKeybindsClient implements ClientModInitializer {
     /** Finds Sorted's "Sort Container" button on the open screen and presses it. */
     private static boolean pressSortContainer() {
         try {
-            Screen screen = Minecraft.getInstance().screen;
+            Screen screen = currentScreen;
             if (!(screen instanceof AbstractContainerScreen<?>)) return false;
             Class<?> widgetClass = Class.forName("com.sorted.client.gui.SortButtonWidget");
             Class<?> pressClass = Class.forName("com.sorted.client.gui.SortButtonWidget$PressAction");
