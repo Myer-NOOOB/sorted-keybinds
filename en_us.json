@@ -1,0 +1,11 @@
+{
+  "key.category.sorted_keybinds.main": "Sorted: Extra Keybinds",
+  "key.sorted_keybinds.quick_stack_nearby": "Quick Stack to nearby containers",
+  "key.sorted_keybinds.smart_empty_nearby": "Smart Empty to nearby containers",
+  "key.sorted_keybinds.quick_fill_nearby": "Quick Fill from nearby containers",
+  "key.sorted_keybinds.sort_container": "Sort open container",
+  "key.sorted_keybinds.clear_highlight": "Clear highlight",
+  "key.sorted_keybinds.auto_sort_inventory": "Toggle auto-sort inventory",
+  "key.sorted_keybinds.auto_sort_containers": "Toggle auto-sort chests",
+  "key.sorted_keybinds.settings": "Open Sorted settings"
+}
